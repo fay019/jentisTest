@@ -1,0 +1,188 @@
+<!doctype html>
+<html>
+<head>
+    <title>JENTIS Consent Engine Test</title>
+
+    <!-- JENTIS Helper is fully included, when you using JENTIS -->
+    <script src="./test_helper_framework.js"></script>
+    <script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="54427406-3e77-451b-a2f3-c8040d237547" data-blockingmode="auto" type="text/javascript"></script>
+	
+		
+<link rel="stylesheet" href="./Jentis_Consentbar.css">
+
+    <!-- JENTIS CONSENT ENGINE API - Events -->
+    <script>
+        document.addEventListener('jentis.consent.engine.minimal-consent-given', function (e) {
+            console.log("Minimal Consent is given: %o", e.detail);
+        });
+        document.addEventListener('jentis.consent.engine.no-consent-given', function (e) {
+            console.log("No Consent is given: %o", e.detail);
+        });
+        document.addEventListener('jentis.consent.engine.send-consent-data', function (e) {
+            console.log("SEND Consent to Server: %o", e.detail);
+        });
+        document.addEventListener('jentis.consent.engine.show-bar', function (e) {
+            console.log("Show Bar now: %o", e.detail);
+        });
+
+        document.addEventListener('jentis.consent.engine.vendor-change', function (e) {
+            console.log("Vendor Changed: %o", e.detail);
+        });
+
+        document.addEventListener('jentis.consent.engine.vendor-add', function (e) {
+            console.log("Vendor Add: %o", e.detail);
+        });
+
+        document.addEventListener('jentis.consent.engine.init', function (e) {
+            console.log("CMP Init: %o", e.detail);
+        });
+
+    </script>
+
+    <script src="./test_conf.js"></script>
+    <script src="../JentisConsentEngine.js"/></script>
+	
+	<script src="./Jentis_Consentbar.js"/></script>
+
+<script>
+
+
+    /////////////////////////// READ COOKIEBOT ///////////////////////////////////
+    function CookiebotCallback_OnDecline(){
+        //console.log('DenyAll => ')
+        //denyAll();
+    }
+
+    function CookiebotCallback_OnAccept() {
+
+        // Accept all
+        if (Cookiebot.consent.statistics && Cookiebot.consent.marketing && Cookiebot.consent.necessary && Cookiebot.consent.preferences )  {
+            //acceptAll()
+            //console.log('Accept All => ')
+
+        }
+
+        if (Cookiebot.consent.statistics)
+        {
+            //console.log('Cookiebot.consent.statistics => ')
+        }
+        if (Cookiebot.consent.marketing)
+        {
+            //console.log('Cookiebot.consent.marketing => ');
+            //acceptGa();
+
+        }
+        if (Cookiebot.consent.necessary)
+        {
+            //console.log('Cookiebot.consent.necessary => ')
+        }
+        if (Cookiebot.consent.preferences)
+        {
+            //console.log('Cookiebot.consent.preferences => ')
+        }
+    }
+
+    console.log( 'Cookiebot :', Cookiebot );
+
+
+    ///////////////////////////////////////////////////////////////////////
+
+    ///////////////////////  Get COOKIE  //////////////////////////////////
+
+    function getCookie(cname) {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(';');
+        for(let i = 0; i <ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+                return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+    let showCookiebot = getCookie('CookieConsent').split(',');
+    console.log(showCookiebot);
+
+    ///////////////////////////////////////////////////////////////////////
+
+
+
+        function acceptAll() {
+            jentis.consent.engine.AcceptAll();
+
+            Cookiebot.submitCustomConsent(true,true,true);
+
+        }
+
+        function acceptGa() {
+            var sConsentId = jentis.consent.engine.setNewVendorConsents({
+                "ga": true,
+                "fb": true
+            });
+            Cookiebot.submitCustomConsent(false,false,true);
+        }
+
+        function denyAll() {
+            var sConsentId = jentis.consent.engine.DenyAll();
+            Cookiebot.submitCustomConsent(false,false,false);
+        }
+
+        function MigrateOldConsent() {
+            var aData = {
+                consentid: "TESTTESTTEST",
+                lastupdate: 100,
+                vendors: {"ga": true, "fb": false, "adw": false}
+            };
+            var sJson = JSON.stringify(aData);
+
+            //Now write it to the local storage
+            localStorage.setItem("jentis.consent.data", sJson);
+            Cookiebot.submitCustomConsent(false,false,true);
+        }
+
+        function MigrateInTimeConsent() {
+            var aData = {
+                consentid: "TESTTESTTEST",
+                lastupdate: Date.now() - 1000,
+                vendors: {"ga": true, "fb": false, "adw": false}
+            };
+            var sJson = JSON.stringify(aData);
+
+            //Now write it to the local storage
+            localStorage.setItem("jentis.consent.data", sJson);
+            Cookiebot.submitCustomConsent(false,false,true);
+        }
+
+
+    </script>
+    <style>
+        button {
+            display: block;
+            margin-bottom: 20px;
+            min-width: 200px;
+        }
+    </style>
+</head>
+<body>
+<button onClick="acceptAll();">
+    Accept All
+</button>
+<button onClick="acceptGa();">
+    Accept GA
+</button>
+<button onClick="denyAll();">
+    DENY All
+</button>
+<button onClick="MigrateOldConsent();">
+    Do old consent OUT OF TIME
+</button>
+<button onClick="MigrateInTimeConsent();">
+    Do old consent IN TIME
+</button>
+
+</body>
+</html>
